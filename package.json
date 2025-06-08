@@ -11,11 +11,14 @@
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.8.19",
+		"@types/crypto-js": "^4.2.2",
 		"typescript": "^5.5.2",
 		"vitest": "~3.0.7",
 		"wrangler": "^4.19.1"
 	},
 	"dependencies": {
+		"@line/bot-sdk": "^10.0.0",
+		"crypto-js": "^4.2.0",
 		"hono": "^4.7.11"
 	}
 }
