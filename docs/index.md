@@ -14,8 +14,7 @@
 | UI             | LINE Messaging API             | 日記入力＆AI分析結果をやり取りする主インタフェース |
 | Botサーバー    | Cloudflare Workers + Hono      | 軽量・高速、エッジ実行環境、Express風に書ける     |
 | AI分析         | OpenAI GPT（Chat API）         | 日記と履歴要約をもとに感情・主題・傾向を出力       |
-| DB             | PostgreSQL（Prisma経由）       | ローカル開発はPostgreSQL、本番はSupabase予定      |
-| ORM            | Prisma                         | 共通の型安全なDBアクセス層                        |
+| DB             | Cloudflare D1                  | SQLiteベースのサーバーレスDB、エッジで高速動作     |
 | Secrets管理    | Cloudflareの環境変数            | OpenAIキーやLINEトークンを安全に保管              |
 | 認証           | LINE userId + 署名検証         | 外部認証不要、LINEの署名で正当性を担保            |
 
@@ -55,7 +54,7 @@
 | ユーザー識別     | LINEの `userId` を使用（一意な識別子）              |
 | リクエスト検証   | `X-Line-Signature` ヘッダーによるHMAC署名検証       |
 | セッション管理   | なし（LINE側で完結）                                 |
-| Prismaでの管理   | 各レコードに `userId` を保持し、ユーザーごとに制御   |
+| データ管理       | 各レコードに `userId` を保持し、ユーザーごとに制御   |
 
 ---
 
