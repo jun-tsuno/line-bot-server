@@ -2,6 +2,7 @@
 	"name": "mentor-diary",
 	"version": "0.0.0",
 	"private": true,
+	"type": "module",
 	"scripts": {
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",
@@ -9,7 +10,9 @@
 		"test": "vitest",
 		"cf-typegen": "wrangler types",
 		"format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json}\"",
-		"format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json}\""
+		"format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json}\"",
+		"db:seed": "node scripts/seed.js",
+		"db:seed:dev": "node scripts/seed.js development"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.8.19",
