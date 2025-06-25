@@ -50,4 +50,16 @@
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
 	 */
 	// "services": [{ "binding": "MY_SERVICE", "service": "my-service" }]
+
+	/**
+	 * D1 Database Bindings
+	 * https://developers.cloudflare.com/d1/
+	 */
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "mentor-diary-db",
+			"database_id": "b0b5377e-c887-4c6e-a37b-a0d94803f930"
+		}
+	]
 }

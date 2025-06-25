@@ -5,4 +5,5 @@
 export type Bindings = {
   LINE_CHANNEL_ACCESS_TOKEN: string;
   LINE_CHANNEL_SECRET: string;
+  DB: D1Database;
 };
