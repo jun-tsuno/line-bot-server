@@ -1,0 +1,46 @@
+// Mentor Diary Database Schema
+// Generated from migrations/0001_create_tables.sql
+
+Table entries {
+  id integer [primary key, increment]
+  user_id text [not null]
+  content text [not null]
+  created_at timestamp [not null, default: `current_timestamp`]
+  updated_at timestamp [not null, default: `current_timestamp`]
+  
+  indexes {
+    (user_id, created_at)
+  }
+}
+
+Table analyses {
+  id integer [primary key, increment]
+  entry_id integer [not null]
+  user_id text [not null]
+  emotion text
+  themes text
+  patterns text
+  positive_points text
+  created_at timestamp [not null, default: `current_timestamp`]
+  
+  indexes {
+    (user_id, created_at)
+  }
+}
+
+Table summaries {
+  id integer [primary key, increment]
+  user_id text [not null]
+  start_date date [not null]
+  end_date date [not null]
+  summary_content text [not null]
+  created_at timestamp [not null, default: `current_timestamp`]
+  updated_at timestamp [not null, default: `current_timestamp`]
+  
+  indexes {
+    (user_id, start_date, end_date) [unique]
+  }
+}
+
+// Relationships
+Ref: analyses.entry_id > entries.id [delete: cascade]
