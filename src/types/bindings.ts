@@ -5,5 +5,6 @@
 export type Bindings = {
   LINE_CHANNEL_ACCESS_TOKEN: string;
   LINE_CHANNEL_SECRET: string;
+  OPENAI_API_KEY: string;
   DB: D1Database;
 };
