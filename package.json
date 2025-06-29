@@ -12,13 +12,18 @@
 		"format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json}\"",
 		"format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json}\"",
 		"db:seed": "node scripts/seed.js",
-		"db:seed:dev": "node scripts/seed.js development"
+		"db:seed:dev": "node scripts/seed.js development",
+		"db:erd": "./scripts/generate-erd.sh",
+		"db:erd:svg": "npx @dbml/cli export schema.dbml -f svg -o _llm-docs/diagrams/er-diagram.svg",
+		"db:erd:png": "npx @dbml/cli export schema.dbml -f png -o _llm-docs/diagrams/er-diagram.png"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.8.19",
 		"@cloudflare/workers-types": "^4.20250620.0",
+		"@dbml/cli": "^3.13.6",
 		"@types/crypto-js": "^4.2.2",
 		"prettier": "^3.5.3",
+		"sql-formatter": "^15.6.6",
 		"typescript": "^5.5.2",
 		"vitest": "~3.0.7",
 		"wrangler": "^4.19.1"
