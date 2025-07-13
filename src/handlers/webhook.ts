@@ -1,10 +1,10 @@
 import type { Context } from 'hono';
-import * as line from '@line/bot-sdk';
+import type * as line from '@line/bot-sdk';
 import type { Bindings } from '@/types/bindings';
 import { validateSignature } from '@/services/line/signature';
 import { createLineClient } from '@/services/line/client';
 import { handleTextMessage } from '@/services/line/message';
-import { ERROR_MESSAGES } from '@/constants/messages';
+import { ERROR_MESSAGES, GENERAL_ERRORS } from '@/constants/messages';
 
 /**
  * LINE Webhook エンドポイント
@@ -30,10 +30,10 @@ export const webhookHandler = async (c: Context<{ Bindings: Bindings }>) => {
   await Promise.all(
     events.map(async (event: line.WebhookEvent) => {
       try {
-        await handleTextMessage(event, lineClient);
+        await handleTextMessage(event, lineClient, c.env, c.env.DB);
       } catch (error) {
         if (error instanceof Error) {
-          console.error('Error:', error);
+          console.error(`${GENERAL_ERRORS.LOG_ERROR}:`, error);
         }
         return c.json(
           { success: false, error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR },
