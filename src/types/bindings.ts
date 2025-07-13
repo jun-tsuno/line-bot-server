@@ -1,3 +1,5 @@
+import type { D1Database } from '@cloudflare/workers-types';
+
 /**
  * Cloudflare Workers のバインディング
  * 環境変数の型定義

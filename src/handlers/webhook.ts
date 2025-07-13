@@ -30,7 +30,7 @@ export const webhookHandler = async (c: Context<{ Bindings: Bindings }>) => {
   await Promise.all(
     events.map(async (event: line.WebhookEvent) => {
       try {
-        await handleTextMessage(event, lineClient);
+        await handleTextMessage(event, lineClient, c.env, c.env.DB);
       } catch (error) {
         if (error instanceof Error) {
           console.error('Error:', error);

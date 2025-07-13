@@ -61,4 +61,12 @@ export class SummaryService {
 
     return result || null;
   }
+
+  async getSummary(
+    userId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<Summary | null> {
+    return this.getByDateRange(userId, startDate, endDate);
+  }
 }
