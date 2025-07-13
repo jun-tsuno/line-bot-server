@@ -1,5 +1,6 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import type { Analysis } from '../../types/database';
+import { DATABASE_ERRORS } from '../../constants/messages';
 
 export class AnalysisService {
   constructor(private db: D1Database) {}
@@ -31,7 +32,7 @@ export class AnalysisService {
       .first<Analysis>();
 
     if (!result) {
-      throw new Error('Failed to create analysis');
+      throw new Error(DATABASE_ERRORS.CREATE_ANALYSIS_FAILED);
     }
 
     return result;

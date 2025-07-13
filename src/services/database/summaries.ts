@@ -1,5 +1,6 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import type { Summary } from '../../types/database';
+import { DATABASE_ERRORS } from '../../constants/messages';
 
 export class SummaryService {
   constructor(private db: D1Database) {}
@@ -24,7 +25,7 @@ export class SummaryService {
       .first<Summary>();
 
     if (!result) {
-      throw new Error('Failed to create or update summary');
+      throw new Error(DATABASE_ERRORS.CREATE_OR_UPDATE_SUMMARY_FAILED);
     }
 
     return result;
@@ -60,5 +61,13 @@ export class SummaryService {
       .first<Summary>();
 
     return result || null;
+  }
+
+  async getSummary(
+    userId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<Summary | null> {
+    return this.getByDateRange(userId, startDate, endDate);
   }
 }

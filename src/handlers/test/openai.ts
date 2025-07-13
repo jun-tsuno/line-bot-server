@@ -5,6 +5,12 @@
 import type { Context } from 'hono';
 import type { Bindings } from '@/types/bindings';
 import { createOpenAIClient } from '@/services/openai';
+import {
+  SUCCESS_MESSAGES,
+  OPENAI_ERRORS,
+  STATUS,
+  GENERAL_ERRORS,
+} from '@/constants/messages';
 
 /**
  * OpenAI API接続テストハンドラー
@@ -18,29 +24,29 @@ export async function testOpenAIHandler(c: Context<{ Bindings: Bindings }>) {
     
     if (isConnected) {
       return c.json({
-        status: 'success',
-        message: 'OpenAI API connection test successful',
+        status: STATUS.SUCCESS,
+        message: SUCCESS_MESSAGES.OPENAI_CONNECTION_TEST,
         timestamp: new Date().toISOString()
       });
     }
     
     return c.json(
       {
-        status: 'error',
-        message: 'OpenAI API connection test failed',
+        status: STATUS.ERROR,
+        message: OPENAI_ERRORS.API_CONNECTION_FAILED,
         timestamp: new Date().toISOString()
       },
       500
     );
   } catch (error) {
-    console.error('OpenAI test handler error:', error);
+    console.error(OPENAI_ERRORS.TEST_HANDLER_ERROR, error);
     
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage = error instanceof Error ? error.message : OPENAI_ERRORS.UNKNOWN_ERROR_FALLBACK;
     
     return c.json(
       {
-        status: 'error',
-        message: `OpenAI API test failed: ${errorMessage}`,
+        status: STATUS.ERROR,
+        message: `${OPENAI_ERRORS.CONNECTION_TEST_FAILED} ${errorMessage}`,
         timestamp: new Date().toISOString()
       },
       500

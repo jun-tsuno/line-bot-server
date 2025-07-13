@@ -57,6 +57,25 @@ alwaysApply: true
   - 曖昧すぎる: 「エラーが発生しました」
   - 情報不足: 「失敗」
 
+### エラーメッセージの定数管理
+
+- **エラーメッセージや文言は必ず定数として管理する**
+- 定数の配置場所: `src/constants/messages.ts`
+- ジャンル別に定数オブジェクトを分類
+  - `AUTH_ERRORS` - 認証関連エラー
+  - `SERVER_ERRORS` - サーバー関連エラー
+  - `ANALYSIS_ERRORS` - 分析関連エラー
+  - `OPENAI_ERRORS` - OpenAI関連エラー
+  - `DATABASE_ERRORS` - データベース関連エラー
+  - `LINE_ERRORS` - LINE関連エラー
+  - `USER_MESSAGES` - ユーザー向けメッセージ
+  - `SUCCESS_MESSAGES` - 成功メッセージ
+  - `STATUS` - ステータス定数
+  - `EVENT_TYPES` - イベントタイプ定数
+- ハードコードされた文字列リテラルは禁止
+- 定数使用により国際化対応や文言変更が容易になる
+- 型安全性を保つため `as const` アサーションを使用
+
 ### ログ出力の実装
 
 - 運用監視に必要な情報を記録

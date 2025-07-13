@@ -1,5 +1,6 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import type { Entry } from '../../types/database';
+import { DATABASE_ERRORS } from '../../constants/messages';
 
 export class EntryService {
   constructor(private db: D1Database) {}
@@ -11,7 +12,7 @@ export class EntryService {
       .first<Entry>();
 
     if (!result) {
-      throw new Error('Failed to create entry');
+      throw new Error(DATABASE_ERRORS.CREATE_ENTRY_FAILED);
     }
 
     return result;
