@@ -2,6 +2,12 @@
  * 日記分析用のGPTプロンプトテンプレート
  */
 
+import {
+  ANALYSIS_ERRORS,
+  ANALYSIS_FALLBACK,
+  ANALYSIS_FORMAT,
+} from '../constants/messages';
+
 /**
  * 分析結果の構造化データ型
  */
@@ -44,10 +50,10 @@ export function generateDiaryAnalysisPrompt(
   let prompt = '';
   
   if (historySummary) {
-    prompt += `【過去7日間の傾向】\n${historySummary}\n\n`;
+    prompt += `${ANALYSIS_FORMAT.HISTORY_PREFIX}\n${historySummary}\n\n`;
   }
   
-  prompt += `【本日の日記】\n${diaryEntry}`;
+  prompt += `${ANALYSIS_FORMAT.DIARY_PREFIX}\n${diaryEntry}`;
   
   return prompt;
 }
@@ -67,7 +73,7 @@ export function parseAnalysisResult(response: string): AnalysisResult {
     
     // 必須フィールドの存在確認
     if (!parsed.emotion || !parsed.themes || !parsed.patterns || !parsed.positive_points) {
-      throw new Error('Missing required fields in analysis result');
+      throw new Error(ANALYSIS_ERRORS.MISSING_REQUIRED_FIELDS);
     }
     
     return {
@@ -77,14 +83,14 @@ export function parseAnalysisResult(response: string): AnalysisResult {
       positive_points: String(parsed.positive_points).substring(0, 150)
     };
   } catch (error) {
-    console.error('Failed to parse analysis result:', error);
+    console.error(ANALYSIS_ERRORS.PARSE_RESULT_FAILED, error);
     
     // フォールバック：構造化されていない応答の場合
     return {
-      emotion: '分析処理中にエラーが発生しました',
-      themes: '分析処理中にエラーが発生しました',
-      patterns: '分析処理中にエラーが発生しました', 
-      positive_points: 'お疲れさまでした。明日も頑張りましょう！'
+      emotion: ANALYSIS_FALLBACK.EMOTION,
+      themes: ANALYSIS_FALLBACK.THEMES,
+      patterns: ANALYSIS_FALLBACK.PATTERNS,
+      positive_points: ANALYSIS_FALLBACK.POSITIVE_POINTS
     };
   }
 }
@@ -93,19 +99,19 @@ export function parseAnalysisResult(response: string): AnalysisResult {
  * 分析結果をユーザー向けメッセージに変換
  */
 export function formatAnalysisForUser(analysis: AnalysisResult): string {
-  return `📝 日記分析結果
+  return `${ANALYSIS_FORMAT.RESULT_TITLE}
 
-🎭 **感情分析**
+${ANALYSIS_FORMAT.EMOTION_SECTION}
 ${analysis.emotion}
 
-🎯 **主なテーマ**
+${ANALYSIS_FORMAT.THEMES_SECTION}
 ${analysis.themes}
 
-🔄 **行動パターン**
+${ANALYSIS_FORMAT.PATTERNS_SECTION}
 ${analysis.patterns}
 
-✨ **ポジティブポイント**
+${ANALYSIS_FORMAT.POSITIVE_SECTION}
 ${analysis.positive_points}
 
-今日もお疲れさまでした！明日も素敵な一日にしましょう 🌟`;
+${ANALYSIS_FORMAT.CLOSING_MESSAGE}`;
 }

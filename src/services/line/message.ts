@@ -1,8 +1,12 @@
-import * as line from '@line/bot-sdk';
+import type * as line from '@line/bot-sdk';
 import type { D1Database } from '@cloudflare/workers-types';
 import { replyMessage } from './client';
 import type { Bindings } from '@/types/bindings';
-import { createDiaryAnalysisService, DiaryAnalysisError } from '@/services/analysis';
+import {
+  createDiaryAnalysisService,
+  DiaryAnalysisError,
+} from '@/services/analysis';
+import { LINE_ERRORS, USER_MESSAGES, EVENT_TYPES } from '@/constants/messages';
 
 /**
  * テキストメッセージ受信時の処理
@@ -13,7 +17,7 @@ export async function handleTextMessage(
   env: Bindings,
   db: D1Database
 ): Promise<void> {
-  if (event.type !== 'message' || event.message.type !== 'text') {
+  if (event.type !== EVENT_TYPES.MESSAGE || event.message.type !== EVENT_TYPES.TEXT) {
     return;
   }
 
@@ -23,7 +27,7 @@ export async function handleTextMessage(
   // ユーザーIDを取得
   const userId = source?.userId;
   if (!userId) {
-    console.error('User ID not found in event');
+    console.error(LINE_ERRORS.USER_ID_NOT_FOUND);
     return;
   }
 
@@ -42,15 +46,15 @@ export async function handleTextMessage(
 
     await replyMessage(lineClient, replyToken, [response]);
   } catch (error) {
-    console.error('Failed to process diary entry:', error);
+    console.error(LINE_ERRORS.PROCESS_DIARY_ENTRY_FAILED, error);
 
     // エラー時のフォールバック応答
-    let errorMessage = '申し訳ございません。分析処理中にエラーが発生しました。しばらく時間をおいて再度お試しください。';
-    
+    let errorMessage: string = USER_MESSAGES.ANALYSIS_ERROR;
+
     if (error instanceof DiaryAnalysisError) {
       // 必要に応じてエラータイプに基づいた適切なメッセージに変更
       if (error.message.includes('API')) {
-        errorMessage = 'AI分析サービスに一時的な問題が発生しています。しばらく時間をおいて再度お試しください。';
+        errorMessage = USER_MESSAGES.AI_SERVICE_TEMPORARY_ISSUE;
       }
     }
 

@@ -4,6 +4,13 @@
  */
 
 import type { Bindings } from '../types/bindings';
+import {
+  OPENAI_ERRORS,
+  ERROR_NAMES,
+  API_CONFIG,
+  HTTP_HEADERS,
+  TEST_MESSAGES,
+} from '../constants/messages';
 
 /**
  * OpenAI API関連のエラータイプ
@@ -15,7 +22,7 @@ export class OpenAIError extends Error {
     public rateLimitReset?: number
   ) {
     super(message);
-    this.name = 'OpenAIError';
+    this.name = ERROR_NAMES.OPENAI_ERROR;
   }
 }
 
@@ -67,19 +74,19 @@ interface RetryConfig {
  */
 export class OpenAIClient {
   private apiKey: string;
-  private baseURL = 'https://api.openai.com/v1';
-  private defaultModel = 'gpt-3.5-turbo';
-  private timeout = 30000; // 30秒
+  private baseURL = API_CONFIG.OPENAI_BASE_URL;
+  private defaultModel = API_CONFIG.DEFAULT_MODEL;
+  private timeout = API_CONFIG.TIMEOUT;
   private retryConfig: RetryConfig = {
-    maxRetries: 3,
-    baseDelay: 1000,
-    maxDelay: 10000,
-    backoffMultiplier: 2
+    maxRetries: API_CONFIG.MAX_RETRIES,
+    baseDelay: API_CONFIG.BASE_DELAY,
+    maxDelay: API_CONFIG.MAX_DELAY,
+    backoffMultiplier: API_CONFIG.BACKOFF_MULTIPLIER
   };
 
   constructor(apiKey: string) {
     if (!apiKey) {
-      throw new OpenAIError('OpenAI API key is required');
+      throw new OpenAIError(OPENAI_ERRORS.API_KEY_REQUIRED);
     }
     this.apiKey = apiKey;
   }
@@ -125,8 +132,8 @@ export class OpenAIClient {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json'
+          'Authorization': `${HTTP_HEADERS.AUTHORIZATION_PREFIX} ${this.apiKey}`,
+          'Content-Type': HTTP_HEADERS.CONTENT_TYPE_JSON
         },
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(this.timeout)
@@ -134,7 +141,7 @@ export class OpenAIClient {
 
       if (!response.ok) {
         const errorText = await response.text();
-        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        let errorMessage = `${OPENAI_ERRORS.HTTP_ERROR_PREFIX} ${response.status}: ${response.statusText}`;
         
         try {
           const errorJson = JSON.parse(errorText);
@@ -148,7 +155,7 @@ export class OpenAIClient {
           }
         }
 
-        const rateLimitReset = response.headers.get('x-ratelimit-reset-requests');
+        const rateLimitReset = response.headers.get(HTTP_HEADERS.X_RATELIMIT_RESET);
         const resetTime = rateLimitReset ? Number.parseInt(rateLimitReset, 10) : undefined;
         
         throw new OpenAIError(errorMessage, response.status, resetTime);
@@ -177,8 +184,8 @@ export class OpenAIClient {
       
       // タイムアウトやネットワークエラー
       if (error instanceof Error && 
-          (error.name === 'TimeoutError' || error.name === 'AbortError')) {
-        const timeoutError = new OpenAIError('Request timeout', 408);
+          (error.name === ERROR_NAMES.TIMEOUT_ERROR || error.name === ERROR_NAMES.ABORT_ERROR)) {
+        const timeoutError = new OpenAIError(OPENAI_ERRORS.REQUEST_TIMEOUT, 408);
         
         if (attempt < this.retryConfig.maxRetries) {
           const delay = this.calculateDelay(attempt);
@@ -190,9 +197,9 @@ export class OpenAIClient {
       }
       
       // その他のネットワークエラー
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : OPENAI_ERRORS.UNKNOWN_ERROR_FALLBACK;
       const networkError = new OpenAIError(
-        `Network error: ${errorMessage}`,
+        `${OPENAI_ERRORS.NETWORK_ERROR} ${errorMessage}`,
         0
       );
       
@@ -272,7 +279,7 @@ export class OpenAIClient {
     historySummary?: string
   ): Promise<string> {
     if (!diaryEntry || diaryEntry.trim().length === 0) {
-      throw new OpenAIError('Diary entry is required');
+      throw new OpenAIError(OPENAI_ERRORS.DIARY_ENTRY_REQUIRED);
     }
 
     const messages = this.generateAnalysisPrompt(diaryEntry, historySummary);
@@ -285,12 +292,12 @@ export class OpenAIClient {
       });
 
       if (!response.choices || response.choices.length === 0) {
-        throw new OpenAIError('No response from OpenAI API');
+        throw new OpenAIError(OPENAI_ERRORS.NO_RESPONSE);
       }
 
       const analysis = response.choices[0].message.content;
       if (!analysis) {
-        throw new OpenAIError('Empty response from OpenAI API');
+        throw new OpenAIError(OPENAI_ERRORS.EMPTY_RESPONSE);
       }
 
       return analysis;
@@ -298,8 +305,8 @@ export class OpenAIClient {
       if (error instanceof OpenAIError) {
         throw error;
       }
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      throw new OpenAIError(`Analysis failed: ${errorMessage}`);
+      const errorMessage = error instanceof Error ? error.message : OPENAI_ERRORS.UNKNOWN_ERROR_FALLBACK;
+      throw new OpenAIError(`${OPENAI_ERRORS.ANALYSIS_FAILED} ${errorMessage}`);
     }
   }
 
@@ -310,7 +317,7 @@ export class OpenAIClient {
     try {
       const testMessages = [{
         role: 'user' as const,
-        content: 'Hello, this is a connection test.'
+        content: TEST_MESSAGES.CONNECTION_TEST
       }];
 
       await this.createChatCompletion(testMessages, {
@@ -321,7 +328,7 @@ export class OpenAIClient {
 
       return true;
     } catch (error) {
-      console.error('OpenAI connection test failed:', error);
+      console.error(OPENAI_ERRORS.CONNECTION_TEST_FAILED, error);
       return false;
     }
   }

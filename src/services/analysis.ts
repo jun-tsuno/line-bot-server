@@ -17,6 +17,12 @@ import {
   formatAnalysisForUser,
   type AnalysisResult
 } from '@/prompts/diary-analysis';
+import { 
+  ERROR_NAMES, 
+  ANALYSIS_ERRORS, 
+  OPENAI_ERRORS, 
+  SERVER_ERRORS 
+} from '@/constants/messages';
 
 /**
  * 日記分析処理結果
@@ -36,7 +42,7 @@ export class DiaryAnalysisError extends Error {
     public cause?: Error
   ) {
     super(message);
-    this.name = 'DiaryAnalysisError';
+    this.name = ERROR_NAMES.DIARY_ANALYSIS_ERROR;
   }
 }
 
@@ -92,13 +98,13 @@ export class DiaryAnalysisService {
         userMessage
       };
     } catch (error) {
-      console.error('Diary analysis failed:', error);
+      console.error(ANALYSIS_ERRORS.DIARY_ANALYSIS_FAILED, error);
       
       if (error instanceof DiaryAnalysisError) {
         throw error;
       }
       
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : SERVER_ERRORS.UNKNOWN_ERROR;
       throw new DiaryAnalysisError(`Analysis processing failed: ${errorMessage}`, error as Error);
     }
   }
@@ -140,7 +146,7 @@ export class DiaryAnalysisService {
 
       return summary;
     } catch (error) {
-      console.error('Failed to get history summary:', error);
+      console.error(ANALYSIS_ERRORS.HISTORY_SUMMARY_FAILED, error);
       return undefined; // エラーが発生しても分析は続行
     }
   }
@@ -186,23 +192,23 @@ export class DiaryAnalysisService {
       });
 
       if (!response.choices || response.choices.length === 0) {
-        throw new DiaryAnalysisError('No response from OpenAI API');
+        throw new DiaryAnalysisError(OPENAI_ERRORS.NO_RESPONSE);
       }
 
       const analysisText = response.choices[0].message.content;
       if (!analysisText) {
-        throw new DiaryAnalysisError('Empty response from OpenAI API');
+        throw new DiaryAnalysisError(OPENAI_ERRORS.EMPTY_RESPONSE);
       }
 
       return parseAnalysisResult(analysisText);
     } catch (error) {
-      console.error('GPT analysis failed:', error);
+      console.error(ANALYSIS_ERRORS.GPT_ANALYSIS_FAILED, error);
       
       if (error instanceof OpenAIError) {
         throw new DiaryAnalysisError(`OpenAI API error: ${error.message}`, error);
       }
       
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : SERVER_ERRORS.UNKNOWN_ERROR;
       throw new DiaryAnalysisError(`GPT analysis failed: ${errorMessage}`, error as Error);
     }
   }
@@ -214,7 +220,7 @@ export class DiaryAnalysisService {
     try {
       return await this.analysisService.getRecentAnalyses(userId, limit);
     } catch (error) {
-      console.error('Failed to get recent analyses:', error);
+      console.error(ANALYSIS_ERRORS.RECENT_ANALYSES_FAILED, error);
       return [];
     }
   }
@@ -226,7 +232,7 @@ export class DiaryAnalysisService {
     try {
       return await this.analysisService.getByEntryId(entryId);
     } catch (error) {
-      console.error('Failed to get analysis by entry ID:', error);
+      console.error(ANALYSIS_ERRORS.ANALYSIS_BY_ENTRY_ID_FAILED, error);
       return null;
     }
   }
