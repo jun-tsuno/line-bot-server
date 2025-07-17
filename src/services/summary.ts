@@ -36,10 +36,14 @@ export class HistorySummaryService {
   private entryService: EntryService;
   private summaryService: SummaryService;
   
-  // キャッシュ有効期限（24時間）
-  private readonly CACHE_DURATION_HOURS = 24;
+  // キャッシュ有効期限（環境変数で設定可能、デフォルト24時間）
+  private readonly CACHE_DURATION_HOURS = parseInt(this.env.CACHE_DURATION_HOURS || '24');
   // 最小投稿数（要約生成に必要な最小件数）
   private readonly MIN_ENTRIES_FOR_SUMMARY = 2;
+  // GPTトークン最適化：1エントリーあたりの最大文字数
+  private readonly MAX_ENTRY_CHARS = 500;
+  // 並行要約生成の制御用Map
+  private static readonly activeSummaryRequests = new Map<string, Promise<string | undefined>>();
 
   constructor(private db: D1Database, private env: Bindings) {
     this.entryService = new EntryService(db);
@@ -52,6 +56,13 @@ export class HistorySummaryService {
   async getOrCreateSummary(userId: string): Promise<string | undefined> {
     try {
       const { startDate, endDate } = this.getDateRange();
+      const requestKey = `${userId}:${startDate}:${endDate}`;
+      
+      // レースコンディション対策：進行中のリクエストがあれば待機
+      const existingRequest = HistorySummaryService.activeSummaryRequests.get(requestKey);
+      if (existingRequest) {
+        return await existingRequest;
+      }
       
       // キャッシュから有効な要約を取得
       const cachedSummary = await this.getValidCachedSummary(userId, startDate, endDate);
@@ -59,8 +70,17 @@ export class HistorySummaryService {
         return cachedSummary.summary_content;
       }
 
-      // キャッシュがない場合は新しく要約を生成
-      return await this.generateNewSummary(userId, startDate, endDate);
+      // 新しい要約生成をPromiseとして登録
+      const summaryPromise = this.generateNewSummary(userId, startDate, endDate);
+      HistorySummaryService.activeSummaryRequests.set(requestKey, summaryPromise);
+      
+      try {
+        const result = await summaryPromise;
+        return result;
+      } finally {
+        // リクエスト完了後にMapから削除
+        HistorySummaryService.activeSummaryRequests.delete(requestKey);
+      }
     } catch (error) {
       console.error(ANALYSIS_ERRORS.HISTORY_SUMMARY_FAILED, error);
       return undefined; // エラーが発生しても分析処理は続行
@@ -71,11 +91,30 @@ export class HistorySummaryService {
    * 過去7日間の日付範囲を取得
    */
   private getDateRange(): { startDate: string; endDate: string } {
-    const endDate = new Date().toISOString().split('T')[0];
-    const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    const now = new Date();
+    const endDate = now.toISOString().split('T')[0];
+    const startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
       .toISOString().split('T')[0];
     
+    // 日付フォーマットの検証
+    if (!this.isValidDateFormat(startDate) || !this.isValidDateFormat(endDate)) {
+      throw new HistorySummaryError('Invalid date format generated');
+    }
+    
     return { startDate, endDate };
+  }
+
+  /**
+   * 日付フォーマットの検証
+   */
+  private isValidDateFormat(dateString: string): boolean {
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(dateString)) {
+      return false;
+    }
+    
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0] === dateString;
   }
 
   /**
@@ -144,9 +183,15 @@ export class HistorySummaryService {
     try {
       const openaiClient = createOpenAIClient(this.env);
       
-      const entriesText = entries
-        .map((entry, index) => `${index + 1}. ${entry.content}`)
-        .join('\n\n');
+      // トークン最適化：長いエントリーを切り詰める
+      const optimizedEntries = entries.map((entry, index) => {
+        const truncatedContent = entry.content.length > this.MAX_ENTRY_CHARS 
+          ? entry.content.substring(0, this.MAX_ENTRY_CHARS) + '...'
+          : entry.content;
+        return `${index + 1}. ${truncatedContent}`;
+      });
+      
+      const entriesText = optimizedEntries.join('\n\n');
 
       const systemPrompt = `あなたは日記要約の専門家です。過去7日間の日記投稿を分析し、感情傾向・主要テーマ・思考パターン・成長ポイントを150文字程度で簡潔に要約してください。
 
@@ -202,8 +247,8 @@ ${entriesText}`;
     endDate: string
   ): Promise<void> {
     try {
-      // 既存の期限切れキャッシュを削除するため、新しいエントリーで上書き
-      await this.summaryService.create(userId, startDate, endDate, '');
+      // 期限切れキャッシュを適切に削除
+      await this.summaryService.delete(userId, startDate, endDate);
     } catch (error) {
       console.error('Failed to cleanup expired cache:', error);
       // エラーが発生してもメイン処理は続行
