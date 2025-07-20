@@ -4,6 +4,7 @@ import { healthHandler } from '@/handlers/health';
 import { webhookHandler } from '@/handlers/webhook';
 import { testDbHandler } from '@/handlers/test/db';
 import { testOpenAIHandler } from '@/handlers/test/openai';
+import { scheduledHandler } from '@/handlers/scheduled';
 import { EnhancedError, getUserMessageFromError, globalErrorHandler } from '@/utils/error-handler';
 import { SERVER_ERRORS, USER_MESSAGES } from '@/constants/messages';
 
@@ -53,4 +54,8 @@ app.post('/webhook', webhookHandler);
 app.get('/test-db', testDbHandler);
 app.get('/test-openai', testOpenAIHandler);
 
-export default app;
+// Cloudflare Workers エクスポート
+export default {
+  fetch: app.fetch,
+  scheduled: scheduledHandler,
+};
