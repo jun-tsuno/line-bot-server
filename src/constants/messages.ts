@@ -63,12 +63,23 @@ export const DATABASE_ERRORS = {
   CREATE_ANALYSIS_FAILED: 'Failed to create analysis',
   CREATE_ENTRY_FAILED: 'Failed to create entry',
   CREATE_OR_UPDATE_SUMMARY_FAILED: 'Failed to create or update summary',
+  CONNECTION_FAILED: 'Database connection failed',
+  TIMEOUT: 'Database operation timeout',
+  TRANSACTION_FAILED: 'Database transaction failed',
+  QUERY_FAILED: 'Database query failed',
+  CONSTRAINT_VIOLATION: 'Database constraint violation',
 } as const;
 
 // LINE関連エラー
 export const LINE_ERRORS = {
   USER_ID_NOT_FOUND: 'User ID not found in event',
   PROCESS_DIARY_ENTRY_FAILED: 'Failed to process diary entry:',
+  API_REQUEST_FAILED: 'LINE API request failed',
+  RATE_LIMITED: 'LINE API rate limit exceeded',
+  INVALID_REQUEST: 'Invalid LINE API request',
+  MESSAGE_SEND_FAILED: 'Failed to send LINE message',
+  REPLY_TOKEN_INVALID: 'Invalid reply token',
+  WEBHOOK_VALIDATION_FAILED: 'Webhook validation failed',
 } as const;
 
 // 一般的なエラー
@@ -99,6 +110,21 @@ export const API_CONFIG = {
   BASE_DELAY: 1000,
   MAX_DELAY: 10000,
   BACKOFF_MULTIPLIER: 2,
+} as const;
+
+// サーキットブレーカー設定
+export const CIRCUIT_BREAKER_CONFIG = {
+  FAILURE_THRESHOLD: 5,
+  RESET_TIMEOUT: 60000, // 60秒
+  MONITORING_PERIOD: 60000, // 60秒
+} as const;
+
+// エラーハンドラー設定
+export const ERROR_HANDLER_CONFIG = {
+  DATABASE_TIMEOUT: 10000, // 10秒
+  LINE_API_TIMEOUT: 15000, // 15秒
+  MAX_DB_RETRIES: 2,
+  MAX_LINE_RETRIES: 3,
 } as const;
 
 // HTTP関連
