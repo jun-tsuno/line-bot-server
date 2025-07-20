@@ -9,4 +9,5 @@ export type Bindings = {
   LINE_CHANNEL_SECRET: string;
   OPENAI_API_KEY: string;
   DB: D1Database;
+  CACHE_DURATION_HOURS?: string;
 };

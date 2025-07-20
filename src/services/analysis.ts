@@ -9,6 +9,7 @@ import type { Entry, Analysis } from '@/types/database';
 import { EntryService } from '@/services/database/entries';
 import { AnalysisService } from '@/services/database/analyses';
 import { SummaryService } from '@/services/database/summaries';
+import { HistorySummaryService } from '@/services/summary';
 import { createOpenAIClient, OpenAIError } from '@/services/openai';
 import { 
   DIARY_ANALYSIS_SYSTEM_PROMPT,
@@ -53,11 +54,13 @@ export class DiaryAnalysisService {
   private entryService: EntryService;
   private analysisService: AnalysisService;
   private summaryService: SummaryService;
+  private historySummaryService: HistorySummaryService;
 
   constructor(private db: D1Database, private env: Bindings) {
     this.entryService = new EntryService(db);
     this.analysisService = new AnalysisService(db);
     this.summaryService = new SummaryService(db);
+    this.historySummaryService = new HistorySummaryService(db, env);
   }
 
   /**
@@ -77,7 +80,7 @@ export class DiaryAnalysisService {
       const entry = await this.entryService.create(userId, diaryContent.trim());
 
       // 過去7日間の要約を取得
-      const historySummary = await this.getHistorySummary(userId);
+      const historySummary = await this.historySummaryService.getOrCreateSummary(userId);
 
       // GPTで分析実行
       const analysisResult = await this.analyzeWithGPT(diaryContent, historySummary);
@@ -109,60 +112,6 @@ export class DiaryAnalysisService {
     }
   }
 
-  /**
-   * 過去7日間の要約を取得
-   */
-  private async getHistorySummary(userId: string): Promise<string | undefined> {
-    try {
-      // 過去7日間の要約をキャッシュから取得
-      const endDate = new Date().toISOString().split('T')[0];
-      const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-        .toISOString().split('T')[0];
-
-      const cachedSummary = await this.summaryService.getSummary(
-        userId,
-        startDate,
-        endDate
-      );
-
-      if (cachedSummary) {
-        return cachedSummary.summary_content;
-      }
-
-      // キャッシュがない場合は過去7日間のエントリーから要約を生成
-      const recentEntries = await this.entryService.getRecentEntries(userId, 7);
-      
-      if (recentEntries.length === 0) {
-        return undefined;
-      }
-
-      // 簡易的な要約を生成（実装を簡素化）
-      const summary = this.generateSimpleSummary(recentEntries);
-      
-      // 要約をキャッシュに保存
-      if (summary) {
-        await this.summaryService.create(userId, startDate, endDate, summary);
-      }
-
-      return summary;
-    } catch (error) {
-      console.error(ANALYSIS_ERRORS.HISTORY_SUMMARY_FAILED, error);
-      return undefined; // エラーが発生しても分析は続行
-    }
-  }
-
-  /**
-   * 簡易要約を生成
-   */
-  private generateSimpleSummary(entries: Entry[]): string {
-    if (entries.length === 0) return '';
-    
-    const entryCount = entries.length;
-    const totalChars = entries.reduce((sum, entry) => sum + entry.content.length, 0);
-    const avgChars = Math.round(totalChars / entryCount);
-    
-    return `過去7日間で${entryCount}件の日記を投稿。平均${avgChars}文字程度の内容。`;
-  }
 
   /**
    * GPTを使用して日記を分析
