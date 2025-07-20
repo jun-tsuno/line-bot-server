@@ -4,7 +4,8 @@ import type { Bindings } from '@/types/bindings';
 import { validateSignature } from '@/services/line/signature';
 import { createLineClient } from '@/services/line/client';
 import { handleTextMessage } from '@/services/line/message';
-import { ERROR_MESSAGES, GENERAL_ERRORS } from '@/constants/messages';
+import { ERROR_MESSAGES, GENERAL_ERRORS, USER_MESSAGES } from '@/constants/messages';
+import { EnhancedError, getUserMessageFromError, globalErrorHandler } from '@/utils/error-handler';
 
 /**
  * LINE Webhook エンドポイント
@@ -32,13 +33,42 @@ export const webhookHandler = async (c: Context<{ Bindings: Bindings }>) => {
       try {
         await handleTextMessage(event, lineClient, c.env, c.env.DB);
       } catch (error) {
-        if (error instanceof Error) {
-          console.error(`${GENERAL_ERRORS.LOG_ERROR}:`, error);
+        // エラーの詳細な処理
+        const errorDetails = globalErrorHandler.classifyError(error as Error, 'webhook.handleTextMessage');
+        
+        // ユーザー向けエラーメッセージを取得
+        const userMessage = getUserMessageFromError(error as Error, 'webhook.handleTextMessage');
+        
+        // エラーログの出力（EnhancedErrorの場合は詳細ログが既に出力されている）
+        if (!(error instanceof EnhancedError)) {
+          console.error(`${GENERAL_ERRORS.LOG_ERROR} in webhook:`, {
+            error: (error as Error).message,
+            stack: (error as Error).stack,
+            event: event.type,
+            userId: (event as any).source?.userId,
+            timestamp: new Date().toISOString(),
+            errorDetails
+          });
         }
-        return c.json(
-          { success: false, error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR },
-          500
-        );
+
+        // ユーザーにエラーメッセージを送信（可能であれば）
+        if (event.type === 'message' && 'replyToken' in event) {
+          try {
+            await lineClient.replyMessage({
+              replyToken: event.replyToken,
+              messages: [{
+                type: 'text',
+                text: userMessage
+              }]
+            });
+          } catch (replyError) {
+            // 返信エラーはログのみ出力
+            console.error('Failed to send error message to user:', replyError);
+          }
+        }
+
+        // サーバーエラーレスポンスは返さず、LINEには200を返す
+        // （LINEのWebhook仕様に従い、エラーでも200を返すことが推奨）
       }
     })
   );
