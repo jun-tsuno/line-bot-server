@@ -35,6 +35,17 @@ export async function handleTextMessage(
 	}
 
 	try {
+		// ローディングアニメーションを表示（最大20秒）
+		try {
+			await lineClient.showLoadingAnimation({
+				chatId: userId,
+				loadingSeconds: 20,
+			});
+		} catch (loadingError) {
+			// ローディングアニメーションの表示に失敗してもメイン処理は継続
+			console.warn("ローディングアニメーションの表示に失敗しました:", loadingError);
+		}
+
 		// 日記分析サービスを作成
 		const analysisService = createDiaryAnalysisService(db, env);
 
