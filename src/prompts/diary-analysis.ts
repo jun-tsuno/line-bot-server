@@ -3,19 +3,19 @@
  */
 
 import {
-  ANALYSIS_ERRORS,
-  ANALYSIS_FALLBACK,
-  ANALYSIS_FORMAT,
-} from '../constants/messages';
+	ANALYSIS_ERRORS,
+	ANALYSIS_FALLBACK,
+	ANALYSIS_FORMAT,
+} from "../constants/messages";
 
 /**
  * 分析結果の構造化データ型
  */
 export interface AnalysisResult {
-  emotion: string;
-  themes: string;
-  patterns: string;
-  positive_points: string;
+	emotion: string;
+	themes: string;
+	patterns: string;
+	positive_points: string;
 }
 
 /**
@@ -44,62 +44,66 @@ export const DIARY_ANALYSIS_SYSTEM_PROMPT = `あなたはユーザーの日記�
  * 日記分析用のユーザープロンプトを生成
  */
 export function generateDiaryAnalysisPrompt(
-  diaryEntry: string,
-  historySummary?: string
+	diaryEntry: string,
+	historySummary?: string,
 ): string {
-  let prompt = '';
-  
-  if (historySummary) {
-    prompt += `${ANALYSIS_FORMAT.HISTORY_PREFIX}\n${historySummary}\n\n`;
-  }
-  
-  prompt += `${ANALYSIS_FORMAT.DIARY_PREFIX}\n${diaryEntry}`;
-  
-  return prompt;
+	let prompt = "";
+
+	if (historySummary) {
+		prompt += `${ANALYSIS_FORMAT.HISTORY_PREFIX}\n${historySummary}\n\n`;
+	}
+
+	prompt += `${ANALYSIS_FORMAT.DIARY_PREFIX}\n${diaryEntry}`;
+
+	return prompt;
 }
 
 /**
  * 分析結果をパースする
  */
 export function parseAnalysisResult(response: string): AnalysisResult {
-  try {
-    // JSONブロックを抽出（```json で囲まれている場合も対応）
-    const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/) || 
-                     response.match(/```\s*([\s\S]*?)\s*```/) ||
-                     [null, response];
-    
-    const jsonString = jsonMatch[1] || response;
-    const parsed = JSON.parse(jsonString.trim());
-    
-    // 必須フィールドの存在確認
-    if (!parsed.emotion || !parsed.themes || !parsed.patterns || !parsed.positive_points) {
-      throw new Error(ANALYSIS_ERRORS.MISSING_REQUIRED_FIELDS);
-    }
-    
-    return {
-      emotion: String(parsed.emotion).substring(0, 100),
-      themes: String(parsed.themes).substring(0, 100),
-      patterns: String(parsed.patterns).substring(0, 100),
-      positive_points: String(parsed.positive_points).substring(0, 150)
-    };
-  } catch (error) {
-    console.error(ANALYSIS_ERRORS.PARSE_RESULT_FAILED, error);
-    
-    // フォールバック：構造化されていない応答の場合
-    return {
-      emotion: ANALYSIS_FALLBACK.EMOTION,
-      themes: ANALYSIS_FALLBACK.THEMES,
-      patterns: ANALYSIS_FALLBACK.PATTERNS,
-      positive_points: ANALYSIS_FALLBACK.POSITIVE_POINTS
-    };
-  }
+	try {
+		// JSONブロックを抽出（```json で囲まれている場合も対応）
+		const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/) ||
+			response.match(/```\s*([\s\S]*?)\s*```/) || [null, response];
+
+		const jsonString = jsonMatch[1] || response;
+		const parsed = JSON.parse(jsonString.trim());
+
+		// 必須フィールドの存在確認
+		if (
+			!parsed.emotion ||
+			!parsed.themes ||
+			!parsed.patterns ||
+			!parsed.positive_points
+		) {
+			throw new Error(ANALYSIS_ERRORS.MISSING_REQUIRED_FIELDS);
+		}
+
+		return {
+			emotion: String(parsed.emotion).substring(0, 100),
+			themes: String(parsed.themes).substring(0, 100),
+			patterns: String(parsed.patterns).substring(0, 100),
+			positive_points: String(parsed.positive_points).substring(0, 150),
+		};
+	} catch (error) {
+		console.error(ANALYSIS_ERRORS.PARSE_RESULT_FAILED, error);
+
+		// フォールバック：構造化されていない応答の場合
+		return {
+			emotion: ANALYSIS_FALLBACK.EMOTION,
+			themes: ANALYSIS_FALLBACK.THEMES,
+			patterns: ANALYSIS_FALLBACK.PATTERNS,
+			positive_points: ANALYSIS_FALLBACK.POSITIVE_POINTS,
+		};
+	}
 }
 
 /**
  * 分析結果をユーザー向けメッセージに変換
  */
 export function formatAnalysisForUser(analysis: AnalysisResult): string {
-  return `${ANALYSIS_FORMAT.RESULT_TITLE}
+	return `${ANALYSIS_FORMAT.RESULT_TITLE}
 
 ${ANALYSIS_FORMAT.EMOTION_SECTION}
 ${analysis.emotion}

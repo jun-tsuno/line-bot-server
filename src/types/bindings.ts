@@ -1,13 +1,13 @@
-import type { D1Database } from '@cloudflare/workers-types';
+import type { D1Database } from "@cloudflare/workers-types";
 
 /**
  * Cloudflare Workers のバインディング
  * 環境変数の型定義
  */
 export type Bindings = {
-  LINE_CHANNEL_ACCESS_TOKEN: string;
-  LINE_CHANNEL_SECRET: string;
-  OPENAI_API_KEY: string;
-  DB: D1Database;
-  CACHE_DURATION_HOURS?: string;
+	LINE_CHANNEL_ACCESS_TOKEN: string;
+	LINE_CHANNEL_SECRET: string;
+	OPENAI_API_KEY: string;
+	DB: D1Database;
+	CACHE_DURATION_HOURS?: string;
 };
