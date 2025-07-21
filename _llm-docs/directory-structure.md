@@ -197,6 +197,8 @@ public/
 | `pnpm format` | コード整形 | Prettier によるコード自動整形 |
 | `pnpm db:seed` | データ初期化 | データベースへのシードデータ投入 |
 | `pnpm db:erd` | ER図生成 | データベーススキーマの図表生成 |
+| `pnpm db:erd:svg` | ER図SVG生成 | schema.dbmlからSVG形式のER図を生成 |
+| `pnpm db:erd:png` | ER図PNG生成 | schema.dbmlからPNG形式のER図を生成 |
 
 ### wrangler.jsonc - Cloudflare Workers設定
 

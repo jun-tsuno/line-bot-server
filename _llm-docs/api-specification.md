@@ -22,8 +22,8 @@ LINE Platform → Webhook → Cloudflare Workers → D1 Database
 |---------------|----------|------|------|
 | `/` | GET | ヘルスチェック | なし |
 | `/webhook` | POST | LINE Webhook受信 | LINE署名検証 |
-| `/test-db` | GET | データベース接続テスト | なし（開発用） |
-| `/test-openai` | GET | OpenAI API接続テスト | なし（開発用） |
+| `/test-db` | GET | データベース接続テスト | なし（本番・開発共用） |
+| `/test-openai` | GET | OpenAI API接続テスト | なし（本番・開発共用） |
 
 ---
 
@@ -157,7 +157,9 @@ X-Line-Signature: {HMAC-SHA256署名}
 
 ---
 
-## 🧪 開発・テスト用エンドポイント
+## 🧪 システム診断エンドポイント
+
+> **注意**: 以下のエンドポイントは本番環境・開発環境の両方で利用可能です。システムの健全性確認やトラブルシューティングに使用します。
 
 ### 3. データベース接続テスト
 
@@ -281,12 +283,12 @@ if (signature !== receivedSignature) {
 
 ### 2. 環境変数管理
 
-| 変数名 | 用途 | 必須 |
-|--------|------|------|
-| `LINE_CHANNEL_ACCESS_TOKEN` | LINE APIアクセストークン | ✅ |
-| `LINE_CHANNEL_SECRET` | LINE Webhook署名検証 | ✅ |
-| `OPENAI_API_KEY` | OpenAI API認証 | ✅ |
-| `CACHE_DURATION_HOURS` | 要約キャッシュ有効期限（デフォルト24時間） | ❌ |
+| 変数名 | 用途 | 必須 | デフォルト値 | 詳細説明 |
+|--------|------|------|------------|----------|
+| `LINE_CHANNEL_ACCESS_TOKEN` | LINE APIアクセストークン | ✅ | - | LINE Messaging APIからメッセージ送信時に使用。LINE Developers Consoleで取得 |
+| `LINE_CHANNEL_SECRET` | LINE Webhook署名検証 | ✅ | - | Webhookリクエストの署名検証でセキュリティを確保。HMAC-SHA256アルゴリズム使用 |
+| `OPENAI_API_KEY` | OpenAI API認証 | ✅ | - | GPT-3.5-turboによる日記分析・要約生成処理で使用。OpenAI Platformで取得 |
+| `CACHE_DURATION_HOURS` | 要約キャッシュ有効期限 | ❌ | 24 | 履歴要約のキャッシュ保持時間（時間単位）。24時間を超えると再生成される |
 
 ### 3. エラー情報保護
 
