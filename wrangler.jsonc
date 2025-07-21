@@ -61,5 +61,16 @@
 			"database_name": "mentor-diary-db",
 			"database_id": "b0b5377e-c887-4c6e-a37b-a0d94803f930"
 		}
-	]
+	],
+
+	/**
+	 * Cron Triggers (Scheduled Workers)
+	 * https://developers.cloudflare.com/workers/configuration/cron-triggers/
+	 */
+	"triggers": {
+		"crons": [
+			"0 2 * * *",
+			"0 14 * * *"
+		]
+	}
 }
