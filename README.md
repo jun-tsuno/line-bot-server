@@ -51,6 +51,37 @@ pnpm run deploy
 | `pnpm test`           | テストを実行                    |
 | `pnpm run deploy`     | Cloudflare Workersにデプロイ    |
 | `pnpm run cf-typegen` | Cloudflareの型定義を生成        |
+| `pnpm run format`     | Prettierでコードを自動整形      |
+| `pnpm run format:check` | コードフォーマットをチェック    |
+| `pnpm run db:erd`     | データベースER図を生成（Database Markup Language形式） |
+| `pnpm run db:erd:svg` | データベースER図を生成（SVG形式） |
+| `pnpm run db:erd:png` | データベースER図を生成（PNG形式） |
+
+### データベースER図の生成
+
+`schema.dbml`ファイルから視覚的なER図を生成できます：
+
+```bash
+# SVG形式で生成（推奨：拡大してもキレイ）
+pnpm run db:erd:svg
+
+# PNG形式で生成
+pnpm run db:erd:png
+```
+
+生成されたファイルは`erd/`ディレクトリに保存されます。
+
+### コードフォーマット
+
+Prettierを使用してコードを自動整形します：
+
+```bash
+# コードを自動整形
+pnpm run format
+
+# フォーマットのチェックのみ（CI/CD用）
+pnpm run format:check
+```
 
 ---
 
@@ -102,7 +133,7 @@ pnpm run deploy
 
 | ファイル | 内容 | 役割 |
 |---------|------|------|
-| **imprementation.md** | 実装原則ガイドライン | コーディング規約・エラーハンドリング・セキュリティルール |
+| **implementation.md** | 実装原則ガイドライン | コーディング規約・エラーハンドリング・セキュリティルール |
 
 ### 🔄 AI支援開発フロー
 
