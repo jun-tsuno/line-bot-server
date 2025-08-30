@@ -4,13 +4,11 @@
  */
 
 import {
-  API_CONFIG,
   ERROR_NAMES,
-  HTTP_HEADERS,
   OPENAI_ERRORS,
-  OPTIMIZED_AI_CONFIG,
   TEST_MESSAGES,
 } from '../constants/messages';
+import { API_CONFIG, HTTP_HEADERS, OPTIMIZED_AI_CONFIG } from '../constants/config';
 import type { Bindings } from '../types/bindings';
 
 /**

@@ -1,8 +1,6 @@
 import type { D1Database } from '@cloudflare/workers-types';
-import {
-  DATABASE_ERRORS,
-  ERROR_HANDLER_CONFIG,
-} from '../../constants/messages';
+import { DATABASE_ERRORS } from '../../constants/messages';
+import { ERROR_HANDLER_CONFIG } from '../../constants/config';
 import type { Entry } from '../../types/database';
 import {
   EnhancedError,

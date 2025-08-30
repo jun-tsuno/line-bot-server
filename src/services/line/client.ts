@@ -1,5 +1,6 @@
 import * as line from '@line/bot-sdk';
-import { ERROR_HANDLER_CONFIG, LINE_ERRORS } from '../../constants/messages';
+import { LINE_ERRORS } from '../../constants/messages';
+import { ERROR_HANDLER_CONFIG } from '../../constants/config';
 import {
   EnhancedError,
   ErrorCategory,

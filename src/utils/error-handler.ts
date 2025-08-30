@@ -4,12 +4,12 @@
  */
 
 import {
-  API_CONFIG,
   DATABASE_ERRORS,
   ERROR_NAMES,
   LINE_ERRORS,
   USER_MESSAGES,
 } from '../constants/messages';
+import { API_CONFIG } from '../constants/config';
 
 /**
  * エラー分類

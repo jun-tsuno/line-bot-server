@@ -3,7 +3,8 @@
  * 日記保存後に非同期でAI分析を実行し、結果をpushMessageで送信
  */
 
-import { ANALYSIS_FORMAT, OPTIMIZED_AI_CONFIG } from '@/constants/messages';
+import { ANALYSIS_FORMAT } from '@/constants/messages';
+import { OPTIMIZED_AI_CONFIG } from '@/constants/config';
 import { AnalysisService } from '@/services/database/analyses';
 import { createOpenAIClient, OpenAIError } from '@/services/openai';
 import { HistorySummaryService } from '@/services/summary';
