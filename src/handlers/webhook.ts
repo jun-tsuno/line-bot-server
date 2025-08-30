@@ -35,7 +35,13 @@ export const webhookHandler = async (c: Context<{ Bindings: Bindings }>) => {
   await Promise.all(
     events.map(async (event: line.WebhookEvent) => {
       try {
-        await handleTextMessage(event, lineClient, c.env, c.env.DB, c.executionCtx);
+        await handleTextMessage(
+          event,
+          lineClient,
+          c.env,
+          c.env.DB,
+          c.executionCtx
+        );
       } catch (error) {
         // エラーの詳細な処理
         const errorDetails = globalErrorHandler.classifyError(

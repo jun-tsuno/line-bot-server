@@ -8,7 +8,11 @@ import {
   OPENAI_ERRORS,
   TEST_MESSAGES,
 } from '../constants/messages';
-import { API_CONFIG, HTTP_HEADERS, OPTIMIZED_AI_CONFIG } from '../constants/config';
+import {
+  API_CONFIG,
+  HTTP_HEADERS,
+  OPTIMIZED_AI_CONFIG,
+} from '../constants/config';
 import type { Bindings } from '../types/bindings';
 
 /**
@@ -252,7 +256,6 @@ export class OpenAIClient {
     const response = await this.makeRequest('/chat/completions', request);
     return (await response.json()) as ChatCompletionResponse;
   }
-
 
   /**
    * API接続テスト

@@ -101,7 +101,6 @@ export const SUCCESS_MESSAGES = {
   OPENAI_CONNECTION_TEST: 'OpenAI API接続テストに成功しました',
 } as const;
 
-
 // テスト関連メッセージ
 export const TEST_MESSAGES = {
   CONNECTION_TEST: 'こんにちは、これは接続テストです。',

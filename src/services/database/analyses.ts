@@ -65,5 +65,4 @@ export class AnalysisService {
 
     return results.results || [];
   }
-
 }

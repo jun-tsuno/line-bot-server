@@ -10,7 +10,10 @@ import {
   SERVER_ERRORS,
 } from '@/constants/messages';
 import { OPTIMIZED_AI_CONFIG } from '@/constants/config';
-import { HISTORY_SUMMARY_SYSTEM_PROMPT, generateSummaryPrompt } from '@/prompts/summary';
+import {
+  HISTORY_SUMMARY_SYSTEM_PROMPT,
+  generateSummaryPrompt,
+} from '@/prompts/summary';
 import { EntryService } from '@/services/database/entries';
 import { SummaryService } from '@/services/database/summaries';
 import { OpenAIError, createOpenAIClient } from '@/services/openai';
@@ -308,4 +311,3 @@ export class HistorySummaryService {
     }
   }
 }
-
