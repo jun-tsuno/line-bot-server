@@ -1,11 +1,10 @@
 import { EVENT_TYPES, LINE_ERRORS, USER_MESSAGES } from '@/constants/messages';
-import {
-  HybridAnalysisError,
-  createHybridAnalysisService,
-} from '@/services/hybrid-analysis';
+import { executeAsyncAnalysis } from '@/services/async-ai-analysis';
+import { DiaryHandlerError, processDiaryEntry } from '@/services/diary-handler';
 import type { Bindings } from '@/types/bindings';
 import type { D1Database } from '@cloudflare/workers-types';
 import type * as line from '@line/bot-sdk';
+import type { ExecutionContext } from 'hono';
 import { replyMessage } from './client';
 
 /**
@@ -15,7 +14,8 @@ export async function handleTextMessage(
   event: line.WebhookEvent,
   lineClient: line.messagingApi.MessagingApiClient,
   env: Bindings,
-  db: D1Database
+  db: D1Database,
+  ctx?: ExecutionContext
 ): Promise<void> {
   if (
     event.type !== EVENT_TYPES.MESSAGE ||
@@ -35,40 +35,47 @@ export async function handleTextMessage(
   }
 
   try {
-    // ローディングアニメーションを表示（最大20秒）
-    try {
-      await lineClient.showLoadingAnimation({
-        chatId: userId,
-        loadingSeconds: 20,
-      });
-    } catch (loadingError) {
-      // ローディングアニメーションの表示に失敗してもメイン処理は継続
-      console.warn(
-        'ローディングアニメーションの表示に失敗しました:',
-        loadingError
-      );
-    }
+    // ローディングアニメーションを表示（最大5秒 - 軽量分析用）
+    await lineClient.showLoadingAnimation({
+      chatId: userId,
+      loadingSeconds: 5,
+    });
 
-    // ハイブリッド分析サービスを作成
-    const analysisService = createHybridAnalysisService(db, env);
+    // 日記を保存して即座に分析中メッセージを返信
+    const diaryResult = await processDiaryEntry(db, env, userId, text);
 
-    // 日記として分析処理を実行
-    const result = await analysisService.processDiaryEntry(userId, text);
-
-    // 分析結果をユーザーに返信
+    // 分析中メッセージを即座にユーザーに返信
     const response: line.messagingApi.TextMessage = {
       type: 'text',
-      text: result.userMessage,
+      text: diaryResult.userMessage,
     };
 
     await replyMessage(lineClient, replyToken, [response]);
+
+    // 非同期でAI分析を実行（結果を待たない）
+    const asyncPromise = executeAsyncAnalysis(
+      db,
+      env,
+      userId,
+      text,
+      diaryResult.entry.id,
+      lineClient
+    ).catch((error) => {
+      // 非同期処理のエラーはログのみ（ユーザーには既に応答済み）
+      console.error('非同期AI分析でエラーが発生', error);
+    });
+
+    // waitUntilでレスポンス完了後も処理を継続
+    if (ctx?.waitUntil) {
+      ctx.waitUntil(asyncPromise);
+    }
   } catch (error) {
     console.error(LINE_ERRORS.PROCESS_DIARY_ENTRY_FAILED, error);
 
     // エラー時のフォールバック応答
     let errorMessage: string = USER_MESSAGES.ANALYSIS_ERROR;
 
-    if (error instanceof HybridAnalysisError) {
+    if (error instanceof DiaryHandlerError) {
       // 必要に応じてエラータイプに基づいた適切なメッセージに変更
       if (error.message.includes('API')) {
         errorMessage = USER_MESSAGES.AI_SERVICE_TEMPORARY_ISSUE;

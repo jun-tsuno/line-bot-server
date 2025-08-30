@@ -1,10 +1,10 @@
 import { SERVER_ERRORS, USER_MESSAGES } from '@/constants/messages';
 import { healthHandler } from '@/handlers/health';
-import { 
+import {
   clearMetricsHandler,
   healthCheckHandler,
   metricsExportHandler,
-  performanceStatsHandler
+  performanceStatsHandler,
 } from '@/handlers/performance';
 import { scheduledHandler } from '@/handlers/scheduled';
 import { testDbHandler } from '@/handlers/test/db';

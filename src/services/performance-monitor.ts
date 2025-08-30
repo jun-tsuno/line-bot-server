@@ -55,18 +55,21 @@ export class PerformanceMonitorService {
 
     // CPU制限超過の警告
     if (metrics.totalProcessingTimeMs > 8) {
-      console.warn(`High CPU usage detected: ${metrics.totalProcessingTimeMs}ms (Level ${metrics.analysisLevel})`, {
-        userId: metrics.userId,
-        entryLength: metrics.entryLength,
-        success: metrics.success
-      });
+      console.warn(
+        `High CPU usage detected: ${metrics.totalProcessingTimeMs}ms (Level ${metrics.analysisLevel})`,
+        {
+          userId: metrics.userId,
+          entryLength: metrics.entryLength,
+          success: metrics.success,
+        }
+      );
     }
 
     // レベル3頻発の警告
     if (metrics.analysisLevel === 3) {
       console.warn(`Emergency mode activated for user ${metrics.userId}`, {
         processingTime: metrics.totalProcessingTimeMs,
-        entryLength: metrics.entryLength
+        entryLength: metrics.entryLength,
       });
     }
   }
@@ -89,23 +92,32 @@ export class PerformanceMonitorService {
     }
 
     const sortedTimes = this.metrics
-      .map(m => m.totalProcessingTimeMs)
+      .map((m) => m.totalProcessingTimeMs)
       .sort((a, b) => a - b);
 
-    const successCount = this.metrics.filter(m => m.success).length;
-    const level1Count = this.metrics.filter(m => m.analysisLevel === 1).length;
-    const level2Count = this.metrics.filter(m => m.analysisLevel === 2).length;
-    const level3Count = this.metrics.filter(m => m.analysisLevel === 3).length;
+    const successCount = this.metrics.filter((m) => m.success).length;
+    const level1Count = this.metrics.filter(
+      (m) => m.analysisLevel === 1
+    ).length;
+    const level2Count = this.metrics.filter(
+      (m) => m.analysisLevel === 2
+    ).length;
+    const level3Count = this.metrics.filter(
+      (m) => m.analysisLevel === 3
+    ).length;
 
     return {
       totalRequests: this.metrics.length,
-      averageProcessingTime: sortedTimes.reduce((a, b) => a + b, 0) / sortedTimes.length,
+      averageProcessingTime:
+        sortedTimes.reduce((a, b) => a + b, 0) / sortedTimes.length,
       level1Count,
       level2Count,
       level3Count,
       successRate: (successCount / this.metrics.length) * 100,
-      p95ProcessingTime: sortedTimes[Math.floor(sortedTimes.length * 0.95)] || 0,
-      p99ProcessingTime: sortedTimes[Math.floor(sortedTimes.length * 0.99)] || 0,
+      p95ProcessingTime:
+        sortedTimes[Math.floor(sortedTimes.length * 0.95)] || 0,
+      p99ProcessingTime:
+        sortedTimes[Math.floor(sortedTimes.length * 0.99)] || 0,
     };
   }
 
@@ -119,34 +131,48 @@ export class PerformanceMonitorService {
   } {
     const cutoffTime = new Date(Date.now() - minutes * 60 * 1000);
     const recentMetrics = this.metrics.filter(
-      m => new Date(m.timestamp) > cutoffTime
+      (m) => new Date(m.timestamp) > cutoffTime
     );
 
     if (recentMetrics.length === 0) {
       return {
         recentAverage: 0,
         recentLevel3Rate: 0,
-        trending: 'stable'
+        trending: 'stable',
       };
     }
 
-    const recentAverage = recentMetrics.reduce((sum, m) => sum + m.totalProcessingTimeMs, 0) / recentMetrics.length;
-    const recentLevel3Rate = (recentMetrics.filter(m => m.analysisLevel === 3).length / recentMetrics.length) * 100;
+    const recentAverage =
+      recentMetrics.reduce((sum, m) => sum + m.totalProcessingTimeMs, 0) /
+      recentMetrics.length;
+    const recentLevel3Rate =
+      (recentMetrics.filter((m) => m.analysisLevel === 3).length /
+        recentMetrics.length) *
+      100;
 
     // トレンド判定（簡易）
-    const firstHalf = recentMetrics.slice(0, Math.floor(recentMetrics.length / 2));
-    const secondHalf = recentMetrics.slice(Math.floor(recentMetrics.length / 2));
+    const firstHalf = recentMetrics.slice(
+      0,
+      Math.floor(recentMetrics.length / 2)
+    );
+    const secondHalf = recentMetrics.slice(
+      Math.floor(recentMetrics.length / 2)
+    );
 
     if (firstHalf.length === 0 || secondHalf.length === 0) {
       return {
         recentAverage,
         recentLevel3Rate,
-        trending: 'stable'
+        trending: 'stable',
       };
     }
 
-    const firstHalfAvg = firstHalf.reduce((sum, m) => sum + m.totalProcessingTimeMs, 0) / firstHalf.length;
-    const secondHalfAvg = secondHalf.reduce((sum, m) => sum + m.totalProcessingTimeMs, 0) / secondHalf.length;
+    const firstHalfAvg =
+      firstHalf.reduce((sum, m) => sum + m.totalProcessingTimeMs, 0) /
+      firstHalf.length;
+    const secondHalfAvg =
+      secondHalf.reduce((sum, m) => sum + m.totalProcessingTimeMs, 0) /
+      secondHalf.length;
 
     const improvement = (firstHalfAvg - secondHalfAvg) / firstHalfAvg;
 
@@ -157,7 +183,7 @@ export class PerformanceMonitorService {
     return {
       recentAverage,
       recentLevel3Rate,
-      trending
+      trending,
     };
   }
 
@@ -175,7 +201,11 @@ export class PerformanceMonitorService {
     const recommendations: string[] = [];
 
     // クリティカル状態の判定
-    if (stats.p95ProcessingTime > 10 || stats.successRate < 80 || trend.recentLevel3Rate > 50) {
+    if (
+      stats.p95ProcessingTime > 10 ||
+      stats.successRate < 80 ||
+      trend.recentLevel3Rate > 50
+    ) {
       return {
         status: 'critical',
         message: 'システムが高負荷状態です。緊急対応が必要です。',
@@ -183,13 +213,17 @@ export class PerformanceMonitorService {
           'OpenAI APIタイムアウトをさらに短縮',
           'より積極的な軽量分析フォールバック',
           'データベースクエリの最適化',
-          'リクエスト頻度の制限検討'
-        ]
+          'リクエスト頻度の制限検討',
+        ],
       };
     }
 
     // 警告状態の判定
-    if (stats.p95ProcessingTime > 8 || stats.successRate < 95 || trend.recentLevel3Rate > 20) {
+    if (
+      stats.p95ProcessingTime > 8 ||
+      stats.successRate < 95 ||
+      trend.recentLevel3Rate > 20
+    ) {
       if (stats.p95ProcessingTime > 8) {
         recommendations.push('CPU使用量が制限に近づいています');
       }
@@ -200,7 +234,7 @@ export class PerformanceMonitorService {
       return {
         status: 'warning',
         message: 'パフォーマンスに注意が必要です。',
-        recommendations
+        recommendations,
       };
     }
 
@@ -208,7 +242,7 @@ export class PerformanceMonitorService {
     return {
       status: 'healthy',
       message: 'システムは正常に動作しています。',
-      recommendations: []
+      recommendations: [],
     };
   }
 
@@ -230,23 +264,20 @@ export class PerformanceMonitorService {
       'analysisLevel',
       'entryLength',
       'success',
-      'errorType'
+      'errorType',
     ];
 
-    const rows = this.metrics.map(m => [
+    const rows = this.metrics.map((m) => [
       m.timestamp,
       m.userId,
       m.totalProcessingTimeMs.toString(),
       m.analysisLevel.toString(),
       m.entryLength.toString(),
       m.success.toString(),
-      m.errorType || ''
+      m.errorType || '',
     ]);
 
-    return [
-      headers.join(','),
-      ...rows.map(row => row.join(','))
-    ].join('\n');
+    return [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
   }
 }
 
