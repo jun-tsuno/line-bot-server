@@ -4,12 +4,11 @@
  */
 
 import {
-  API_CONFIG,
   ERROR_NAMES,
-  HTTP_HEADERS,
   OPENAI_ERRORS,
   TEST_MESSAGES,
 } from '../constants/messages';
+import { API_CONFIG, HTTP_HEADERS, OPTIMIZED_AI_CONFIG } from '../constants/config';
 import type { Bindings } from '../types/bindings';
 
 /**
@@ -254,87 +253,6 @@ export class OpenAIClient {
     return (await response.json()) as ChatCompletionResponse;
   }
 
-  /**
-   * 日記分析用のプロンプトを生成
-   */
-  private generateAnalysisPrompt(
-    diaryEntry: string,
-    historySummary?: string
-  ): Array<{
-    role: 'system' | 'user' | 'assistant';
-    content: string;
-  }> {
-    const systemPrompt = `あなたはユーザーの日記を分析するAIアシスタントです。
-日記の内容を読み、以下の観点から分析してください：
-
-1. 現在の感情状態と感情の変化
-2. 主要なテーマや思考パターン
-3. ポジティブな点や成長の兆し
-4. 励ましやアドバイス
-
-分析結果は自然で親しみやすい文体で返してください。`;
-
-    const messages: Array<{
-      role: 'system' | 'user' | 'assistant';
-      content: string;
-    }> = [{ role: 'system', content: systemPrompt }];
-
-    if (historySummary) {
-      messages.push({
-        role: 'user',
-        content: `【過去7日間の傾向】\n${historySummary}`,
-      });
-    }
-
-    messages.push({
-      role: 'user',
-      content: `【本日の投稿】\n${diaryEntry}`,
-    });
-
-    return messages;
-  }
-
-  /**
-   * 日記を分析する
-   */
-  async analyzeDiary(
-    diaryEntry: string,
-    historySummary?: string
-  ): Promise<string> {
-    if (!diaryEntry || diaryEntry.trim().length === 0) {
-      throw new OpenAIError(OPENAI_ERRORS.DIARY_ENTRY_REQUIRED);
-    }
-
-    const messages = this.generateAnalysisPrompt(diaryEntry, historySummary);
-
-    try {
-      const response = await this.createChatCompletion(messages, {
-        model: this.defaultModel,
-        maxTokens: 1000,
-        temperature: 0.7,
-      });
-
-      if (!response.choices || response.choices.length === 0) {
-        throw new OpenAIError(OPENAI_ERRORS.NO_RESPONSE);
-      }
-
-      const analysis = response.choices[0].message.content;
-      if (!analysis) {
-        throw new OpenAIError(OPENAI_ERRORS.EMPTY_RESPONSE);
-      }
-
-      return analysis;
-    } catch (error) {
-      if (error instanceof OpenAIError) {
-        throw error;
-      }
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : OPENAI_ERRORS.UNKNOWN_ERROR_FALLBACK;
-      throw new OpenAIError(`${OPENAI_ERRORS.ANALYSIS_FAILED} ${errorMessage}`);
-    }
-  }
 
   /**
    * API接続テスト

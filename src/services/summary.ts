@@ -9,6 +9,8 @@ import {
   OPENAI_ERRORS,
   SERVER_ERRORS,
 } from '@/constants/messages';
+import { OPTIMIZED_AI_CONFIG } from '@/constants/config';
+import { HISTORY_SUMMARY_SYSTEM_PROMPT, generateSummaryPrompt } from '@/prompts/summary';
 import { EntryService } from '@/services/database/entries';
 import { SummaryService } from '@/services/database/summaries';
 import { OpenAIError, createOpenAIClient } from '@/services/openai';
@@ -225,29 +227,15 @@ export class HistorySummaryService {
 
       const entriesText = optimizedEntries.join('\n\n');
 
-      const systemPrompt = `あなたは日記要約の専門家です。過去7日間の日記投稿を分析し、感情傾向・主要テーマ・思考パターン・成長ポイントを150文字程度で簡潔に要約してください。
-
-要約には以下の要素を含めてください：
-- 主な感情傾向（ポジティブ/ネガティブ/変化）
-- 繰り返し言及されるテーマや関心事
-- 行動パターンや思考の特徴
-- 成長や変化の兆し
-
-簡潔で具体的な要約を作成してください。`;
-
-      const userPrompt = `以下の過去7日間の日記投稿を要約してください：
-
-${entriesText}`;
-
       const response = await openaiClient.createChatCompletion(
         [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
+          { role: 'system', content: HISTORY_SUMMARY_SYSTEM_PROMPT },
+          { role: 'user', content: generateSummaryPrompt(entriesText) },
         ],
         {
           model: 'gpt-3.5-turbo',
-          maxTokens: 200,
-          temperature: 0.7,
+          maxTokens: OPTIMIZED_AI_CONFIG.SUMMARY_MAX_TOKENS,
+          temperature: OPTIMIZED_AI_CONFIG.SUMMARY_TEMPERATURE,
         }
       );
 
@@ -321,12 +309,3 @@ ${entriesText}`;
   }
 }
 
-/**
- * HistorySummaryServiceのファクトリー関数
- */
-export function createHistorySummaryService(
-  db: D1Database,
-  env: Bindings
-): HistorySummaryService {
-  return new HistorySummaryService(db, env);
-}

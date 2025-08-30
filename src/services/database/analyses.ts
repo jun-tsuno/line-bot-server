@@ -50,13 +50,13 @@ export class AnalysisService {
   }
 
   async getRecentAnalyses(userId: string, limit = 10): Promise<Analysis[]> {
+    // CPU最適化: JOINを削除し、直接フィルタリング
     const results = await this.db
       .prepare(
         `
-        SELECT a.* FROM analyses a
-        JOIN entries e ON a.entry_id = e.id
-        WHERE a.user_id = ?
-        ORDER BY a.created_at DESC
+        SELECT * FROM analyses
+        WHERE user_id = ?
+        ORDER BY created_at DESC
         LIMIT ?
       `
       )
@@ -65,4 +65,5 @@ export class AnalysisService {
 
     return results.results || [];
   }
+
 }

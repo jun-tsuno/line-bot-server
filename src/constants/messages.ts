@@ -101,38 +101,6 @@ export const SUCCESS_MESSAGES = {
   OPENAI_CONNECTION_TEST: 'OpenAI API接続テストに成功しました',
 } as const;
 
-// API設定
-export const API_CONFIG = {
-  OPENAI_BASE_URL: 'https://api.openai.com/v1',
-  DEFAULT_MODEL: 'gpt-3.5-turbo',
-  TIMEOUT: 30000,
-  MAX_RETRIES: 3,
-  BASE_DELAY: 1000,
-  MAX_DELAY: 10000,
-  BACKOFF_MULTIPLIER: 2,
-} as const;
-
-// サーキットブレーカー設定
-export const CIRCUIT_BREAKER_CONFIG = {
-  FAILURE_THRESHOLD: 5,
-  RESET_TIMEOUT: 60000, // 60秒
-  MONITORING_PERIOD: 60000, // 60秒
-} as const;
-
-// エラーハンドラー設定
-export const ERROR_HANDLER_CONFIG = {
-  DATABASE_TIMEOUT: 10000, // 10秒
-  LINE_API_TIMEOUT: 15000, // 15秒
-  MAX_DB_RETRIES: 2,
-  MAX_LINE_RETRIES: 3,
-} as const;
-
-// HTTP関連
-export const HTTP_HEADERS = {
-  AUTHORIZATION_PREFIX: 'Bearer',
-  CONTENT_TYPE_JSON: 'application/json',
-  X_RATELIMIT_RESET: 'x-ratelimit-reset-requests',
-} as const;
 
 // テスト関連メッセージ
 export const TEST_MESSAGES = {
