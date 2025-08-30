@@ -105,11 +105,19 @@ export const SUCCESS_MESSAGES = {
 export const API_CONFIG = {
   OPENAI_BASE_URL: 'https://api.openai.com/v1',
   DEFAULT_MODEL: 'gpt-3.5-turbo',
-  TIMEOUT: 30000,
-  MAX_RETRIES: 3,
-  BASE_DELAY: 1000,
-  MAX_DELAY: 10000,
+  TIMEOUT: 3000, // 30秒 → 3秒（CPU使用量削減）
+  MAX_RETRIES: 1, // 3回 → 1回（CPU使用量削減）
+  BASE_DELAY: 500, // 1秒 → 0.5秒（高速化）
+  MAX_DELAY: 2000, // 10秒 → 2秒（高速化）
   BACKOFF_MULTIPLIER: 2,
+} as const;
+
+// CPU最適化用AI設定
+export const OPTIMIZED_AI_CONFIG = {
+  MAX_TOKENS: 300, // 1000 → 300（CPU使用量削減）
+  TEMPERATURE: 0.3, // 0.7 → 0.3（CPU使用量削減）
+  SUMMARY_MAX_TOKENS: 150, // 200 → 150（CPU使用量削減）
+  SUMMARY_TEMPERATURE: 0.2, // 0.7 → 0.2（CPU使用量削減）
 } as const;
 
 // サーキットブレーカー設定

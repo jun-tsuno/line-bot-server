@@ -11,14 +11,7 @@ export class SummaryService {
     endDate: string,
     summaryContent: string
   ): Promise<Summary> {
-    // まず既存のレコードを確認
-    const existing = await this.getByDateRange(userId, startDate, endDate);
-
-    // 既存のレコードが同じ内容の場合は更新しない
-    if (existing && existing.summary_content === summaryContent) {
-      return existing;
-    }
-
+    // CPU最適化: 重複クエリを排除し、UPSERT文のみを使用
     const result = await this.db
       .prepare(
         `
@@ -26,8 +19,16 @@ export class SummaryService {
         VALUES (?, ?, ?, ?) 
         ON CONFLICT(user_id, start_date, end_date) 
         DO UPDATE SET 
-          summary_content = excluded.summary_content,
-          updated_at = CURRENT_TIMESTAMP
+          summary_content = CASE 
+            WHEN summaries.summary_content != excluded.summary_content 
+            THEN excluded.summary_content
+            ELSE summaries.summary_content
+          END,
+          updated_at = CASE 
+            WHEN summaries.summary_content != excluded.summary_content 
+            THEN CURRENT_TIMESTAMP
+            ELSE summaries.updated_at
+          END
         RETURNING *
       `
       )

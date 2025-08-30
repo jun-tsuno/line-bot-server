@@ -1,8 +1,8 @@
 import { EVENT_TYPES, LINE_ERRORS, USER_MESSAGES } from '@/constants/messages';
 import {
-  DiaryAnalysisError,
-  createDiaryAnalysisService,
-} from '@/services/analysis';
+  HybridAnalysisError,
+  createHybridAnalysisService,
+} from '@/services/hybrid-analysis';
 import type { Bindings } from '@/types/bindings';
 import type { D1Database } from '@cloudflare/workers-types';
 import type * as line from '@line/bot-sdk';
@@ -49,8 +49,8 @@ export async function handleTextMessage(
       );
     }
 
-    // 日記分析サービスを作成
-    const analysisService = createDiaryAnalysisService(db, env);
+    // ハイブリッド分析サービスを作成
+    const analysisService = createHybridAnalysisService(db, env);
 
     // 日記として分析処理を実行
     const result = await analysisService.processDiaryEntry(userId, text);
@@ -68,7 +68,7 @@ export async function handleTextMessage(
     // エラー時のフォールバック応答
     let errorMessage: string = USER_MESSAGES.ANALYSIS_ERROR;
 
-    if (error instanceof DiaryAnalysisError) {
+    if (error instanceof HybridAnalysisError) {
       // 必要に応じてエラータイプに基づいた適切なメッセージに変更
       if (error.message.includes('API')) {
         errorMessage = USER_MESSAGES.AI_SERVICE_TEMPORARY_ISSUE;

@@ -8,6 +8,7 @@ import {
   ERROR_NAMES,
   HTTP_HEADERS,
   OPENAI_ERRORS,
+  OPTIMIZED_AI_CONFIG,
   TEST_MESSAGES,
 } from '../constants/messages';
 import type { Bindings } from '../types/bindings';
@@ -310,8 +311,8 @@ export class OpenAIClient {
     try {
       const response = await this.createChatCompletion(messages, {
         model: this.defaultModel,
-        maxTokens: 1000,
-        temperature: 0.7,
+        maxTokens: OPTIMIZED_AI_CONFIG.MAX_TOKENS,
+        temperature: OPTIMIZED_AI_CONFIG.TEMPERATURE,
       });
 
       if (!response.choices || response.choices.length === 0) {

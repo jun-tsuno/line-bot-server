@@ -7,6 +7,7 @@ import {
   ANALYSIS_ERRORS,
   ERROR_NAMES,
   OPENAI_ERRORS,
+  OPTIMIZED_AI_CONFIG,
   SERVER_ERRORS,
 } from '@/constants/messages';
 import {
@@ -146,8 +147,8 @@ export class DiaryAnalysisService {
 
       const response = await openaiClient.createChatCompletion(messages, {
         model: 'gpt-3.5-turbo',
-        maxTokens: 800,
-        temperature: 0.7,
+        maxTokens: OPTIMIZED_AI_CONFIG.MAX_TOKENS,
+        temperature: OPTIMIZED_AI_CONFIG.TEMPERATURE,
       });
 
       if (!response.choices || response.choices.length === 0) {

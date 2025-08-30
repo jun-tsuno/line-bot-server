@@ -7,6 +7,7 @@ import {
   ANALYSIS_ERRORS,
   ERROR_NAMES,
   OPENAI_ERRORS,
+  OPTIMIZED_AI_CONFIG,
   SERVER_ERRORS,
 } from '@/constants/messages';
 import { EntryService } from '@/services/database/entries';
@@ -246,8 +247,8 @@ ${entriesText}`;
         ],
         {
           model: 'gpt-3.5-turbo',
-          maxTokens: 200,
-          temperature: 0.7,
+          maxTokens: OPTIMIZED_AI_CONFIG.SUMMARY_MAX_TOKENS,
+          temperature: OPTIMIZED_AI_CONFIG.SUMMARY_TEMPERATURE,
         }
       );
 
