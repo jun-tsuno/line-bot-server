@@ -57,12 +57,8 @@ export async function processDiaryEntry(
 
     // 分析中メッセージを返信
     const analysisMessage = [
-      '📝 日記を記録しました！',
-      '',
       '🔍 AI分析を実行中です...',
       '少々お待ちください。分析が完了次第、詳細な結果をお送りします。',
-      '',
-      '✨ 今日も日記を書いていただき、ありがとうございます！',
     ].join('\n');
 
     return {

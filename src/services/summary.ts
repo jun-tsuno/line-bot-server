@@ -322,12 +322,3 @@ ${entriesText}`;
   }
 }
 
-/**
- * HistorySummaryServiceのファクトリー関数
- */
-export function createHistorySummaryService(
-  db: D1Database,
-  env: Bindings
-): HistorySummaryService {
-  return new HistorySummaryService(db, env);
-}

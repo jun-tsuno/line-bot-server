@@ -66,39 +66,4 @@ export class AnalysisService {
     return results.results || [];
   }
 
-  /**
-   * 既存の分析を更新（AI分析結果で上書き）
-   */
-  async updateAnalysis(
-    entryId: number,
-    userId: string,
-    data: {
-      emotion: string;
-      themes: string;
-      patterns: string;
-      positive_points: string;
-    }
-  ): Promise<void> {
-    const result = await this.db
-      .prepare(
-        `
-        UPDATE analyses 
-        SET emotion = ?, themes = ?, patterns = ?, positive_points = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE entry_id = ? AND user_id = ?
-      `
-      )
-      .bind(
-        data.emotion,
-        data.themes,
-        data.patterns,
-        data.positive_points,
-        entryId,
-        userId
-      )
-      .run();
-
-    if (!result.success) {
-      throw new Error(`Failed to update analysis for entry ${entryId}`);
-    }
-  }
 }

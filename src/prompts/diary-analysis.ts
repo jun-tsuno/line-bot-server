@@ -99,23 +99,3 @@ export function parseAnalysisResult(response: string): AnalysisResult {
   }
 }
 
-/**
- * 分析結果をユーザー向けメッセージに変換
- */
-export function formatAnalysisForUser(analysis: AnalysisResult): string {
-  return `${ANALYSIS_FORMAT.RESULT_TITLE}
-
-${ANALYSIS_FORMAT.EMOTION_SECTION}
-${analysis.emotion}
-
-${ANALYSIS_FORMAT.THEMES_SECTION}
-${analysis.themes}
-
-${ANALYSIS_FORMAT.PATTERNS_SECTION}
-${analysis.patterns}
-
-${ANALYSIS_FORMAT.POSITIVE_SECTION}
-${analysis.positive_points}
-
-${ANALYSIS_FORMAT.CLOSING_MESSAGE}`;
-}
