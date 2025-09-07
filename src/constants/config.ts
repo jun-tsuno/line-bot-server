@@ -11,7 +11,7 @@ export const API_CONFIG = {
 
 // CPU最適化用AI設定
 export const OPTIMIZED_AI_CONFIG = {
-  MAX_TOKENS: 300, // 1000 → 300（CPU使用量削減）
+  MAX_TOKENS: 1000, // 日記分析の完全な応答を確保
   TEMPERATURE: 0.3, // 0.7 → 0.3（CPU使用量削減）
   SUMMARY_MAX_TOKENS: 150, // 200 → 150（CPU使用量削減）
   SUMMARY_TEMPERATURE: 0.2, // 0.7 → 0.2（CPU使用量削減）
