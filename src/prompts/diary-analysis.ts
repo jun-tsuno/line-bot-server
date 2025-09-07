@@ -69,20 +69,11 @@ export function parseAnalysisResult(response: string): AnalysisResult {
   let jsonString = '';
 
   try {
-    // デバッグ用ログ：受信した応答全体を確認
-    console.log('AI応答（生データ）:', response);
-    console.log('AI応答の長さ:', response.length);
-
     // JSONブロックを抽出（```json で囲まれている場合も対応）
     const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/) ||
       response.match(/```\s*([\s\S]*?)\s*```/) || [null, response];
 
     jsonString = jsonMatch[1] || response;
-
-    // デバッグ用ログ：抽出したJSON文字列を確認
-    console.log('抽出したJSON文字列:', jsonString);
-    console.log('JSON文字列の長さ:', jsonString.length);
-
     const parsed = JSON.parse(jsonString.trim());
 
     // 必須フィールドの存在確認
@@ -106,8 +97,6 @@ export function parseAnalysisResult(response: string): AnalysisResult {
 
     // エラー時の詳細な処理
     if (error instanceof SyntaxError) {
-      console.error('JSONパースエラー - 不完全な応答の可能性があります');
-      console.error('エラー位置:', error.message);
 
       // 不完全なJSONを修復する試み
       try {
@@ -128,15 +117,10 @@ export function parseAnalysisResult(response: string): AnalysisResult {
           }
         }
 
-        console.log(
-          '修復を試みたJSON（最初の500文字）:',
-          fixedJson.substring(0, 500)
-        );
         const parsed = JSON.parse(fixedJson);
 
         // 最低限の必須フィールドがある場合は使用
         if (parsed.emotion || parsed.themes) {
-          console.log('修復されたJSONから部分的な結果を返します');
           return {
             emotion: String(
               parsed.emotion || '感情の分析中にエラーが発生しました'
@@ -154,7 +138,7 @@ export function parseAnalysisResult(response: string): AnalysisResult {
           };
         }
       } catch (repairError) {
-        console.error('JSON修復にも失敗しました:', repairError);
+        // JSON修復に失敗した場合はフォールバック処理へ
       }
     }
 
