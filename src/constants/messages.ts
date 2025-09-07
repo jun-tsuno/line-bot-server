@@ -46,9 +46,6 @@ export const ANALYSIS_FORMAT = {
 export const OPENAI_ERRORS = {
   NO_RESPONSE: 'OpenAI APIからのレスポンスがありません',
   EMPTY_RESPONSE: 'OpenAI APIからの空のレスポンス',
-  CONNECTION_TEST_FAILED: 'OpenAI接続テストに失敗しました:',
-  API_CONNECTION_FAILED: 'OpenAI API接続テストに失敗しました',
-  TEST_HANDLER_ERROR: 'OpenAIテストハンドラーエラー:',
   API_KEY_REQUIRED: 'OpenAI APIキーが必要です',
   DIARY_ENTRY_REQUIRED: '日記エントリーが必要です',
   ANALYSIS_FAILED: '分析に失敗しました:',
@@ -96,15 +93,7 @@ export const ERROR_NAMES = {
   ABORT_ERROR: 'AbortError',
 } as const;
 
-// 成功メッセージ
-export const SUCCESS_MESSAGES = {
-  OPENAI_CONNECTION_TEST: 'OpenAI API接続テストに成功しました',
-} as const;
 
-// テスト関連メッセージ
-export const TEST_MESSAGES = {
-  CONNECTION_TEST: 'こんにちは、これは接続テストです。',
-} as const;
 
 // ユーザー向けメッセージ（LINE）
 export const USER_MESSAGES = {
@@ -114,11 +103,6 @@ export const USER_MESSAGES = {
     'AI分析サービスに一時的な問題が発生しています。しばらく時間をおいて再度お試しください。',
 } as const;
 
-// ステータス
-export const STATUS = {
-  SUCCESS: '成功',
-  ERROR: 'エラー',
-} as const;
 
 // イベントタイプ
 export const EVENT_TYPES = {

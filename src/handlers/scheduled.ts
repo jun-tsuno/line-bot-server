@@ -219,7 +219,7 @@ async function cleanupOldData(database: D1Database): Promise<{
     const deleteEntriesResult = await database
       .prepare(
         `
-        DELETE FROM entries 
+        DELETE FROM entries
         WHERE datetime(created_at) < datetime(?)
       `
       )
@@ -237,7 +237,7 @@ async function cleanupOldData(database: D1Database): Promise<{
     const deleteSummariesResult = await database
       .prepare(
         `
-        DELETE FROM summaries 
+        DELETE FROM summaries
         WHERE datetime(created_at) < datetime(?)
       `
       )
@@ -272,10 +272,10 @@ async function optimizeApiUsage(database: D1Database): Promise<number> {
     const duplicateResult = await database
       .prepare(
         `
-        DELETE FROM summaries 
+        DELETE FROM summaries
         WHERE id NOT IN (
-          SELECT MIN(id) 
-          FROM summaries 
+          SELECT MIN(id)
+          FROM summaries
           GROUP BY user_id, start_date, end_date, summary_content
         )
       `
@@ -289,9 +289,9 @@ async function optimizeApiUsage(database: D1Database): Promise<number> {
     const unusedCacheResult = await database
       .prepare(
         `
-        DELETE FROM summaries 
+        DELETE FROM summaries
         WHERE user_id NOT IN (
-          SELECT DISTINCT user_id FROM entries 
+          SELECT DISTINCT user_id FROM entries
           WHERE datetime(created_at) >= datetime('now', '-30 days')
         )
         AND datetime(created_at) < datetime('now', '-7 days')
@@ -350,8 +350,8 @@ async function getMonitoringStats(database: D1Database): Promise<{
     const activeUsersResult = await database
       .prepare(
         `
-        SELECT COUNT(DISTINCT user_id) as count 
-        FROM entries 
+        SELECT COUNT(DISTINCT user_id) as count
+        FROM entries
         WHERE datetime(created_at) >= datetime('now', '-7 days')
       `
       )
@@ -400,8 +400,8 @@ async function getActiveUsers(database: D1Database): Promise<string[]> {
   const result = await database
     .prepare(
       `
-      SELECT DISTINCT user_id 
-      FROM entries 
+      SELECT DISTINCT user_id
+      FROM entries
       WHERE datetime(created_at) >= datetime('now', '-' || ? || ' days')
       ORDER BY user_id
     `

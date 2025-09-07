@@ -1,14 +1,6 @@
 import { SERVER_ERRORS, USER_MESSAGES } from '@/constants/messages';
 import { healthHandler } from '@/handlers/health';
-import {
-  clearMetricsHandler,
-  healthCheckHandler,
-  metricsExportHandler,
-  performanceStatsHandler,
-} from '@/handlers/performance';
 import { scheduledHandler } from '@/handlers/scheduled';
-import { testDbHandler } from '@/handlers/test/db';
-import { testOpenAIHandler } from '@/handlers/test/openai';
 import { webhookHandler } from '@/handlers/webhook';
 import type { Bindings } from '@/types/bindings';
 import {
@@ -60,15 +52,6 @@ app.onError((error, c) => {
 app.get('/', healthHandler);
 app.post('/webhook', webhookHandler);
 
-// パフォーマンス監視ルート
-app.get('/health', healthCheckHandler);
-app.get('/performance', performanceStatsHandler);
-app.get('/metrics/export', metricsExportHandler);
-app.post('/metrics/clear', clearMetricsHandler);
-
-// テスト用ルート
-app.get('/test-db', testDbHandler);
-app.get('/test-openai', testOpenAIHandler);
 
 // Cloudflare Workers エクスポート
 export default {

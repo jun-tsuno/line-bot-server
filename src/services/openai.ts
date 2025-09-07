@@ -3,16 +3,8 @@
  * Chat Completions APIを使用して日記の分析を行う
  */
 
-import {
-  ERROR_NAMES,
-  OPENAI_ERRORS,
-  TEST_MESSAGES,
-} from '../constants/messages';
-import {
-  API_CONFIG,
-  HTTP_HEADERS,
-  OPTIMIZED_AI_CONFIG,
-} from '../constants/config';
+import { ERROR_NAMES, OPENAI_ERRORS } from '../constants/messages';
+import { API_CONFIG, HTTP_HEADERS } from '../constants/config';
 import type { Bindings } from '../types/bindings';
 
 /**
@@ -30,9 +22,9 @@ export class OpenAIError extends Error {
 }
 
 /**
- * OpenAI APIのリクエスト・レスポンス型定義
+ * OpenAI APIのリクエスト・レスポンス型定義（内部使用）
  */
-export interface ChatCompletionRequest {
+interface ChatCompletionRequest {
   model: string;
   messages: Array<{
     role: 'system' | 'user' | 'assistant';
@@ -42,7 +34,7 @@ export interface ChatCompletionRequest {
   temperature?: number;
 }
 
-export interface ChatCompletionResponse {
+interface ChatCompletionResponse {
   id: string;
   object: string;
   created: number;
@@ -257,30 +249,6 @@ export class OpenAIClient {
     return (await response.json()) as ChatCompletionResponse;
   }
 
-  /**
-   * API接続テスト
-   */
-  async testConnection(): Promise<boolean> {
-    try {
-      const testMessages = [
-        {
-          role: 'user' as const,
-          content: TEST_MESSAGES.CONNECTION_TEST,
-        },
-      ];
-
-      await this.createChatCompletion(testMessages, {
-        model: this.defaultModel,
-        maxTokens: 10,
-        temperature: 0,
-      });
-
-      return true;
-    } catch (error) {
-      console.error(OPENAI_ERRORS.CONNECTION_TEST_FAILED, error);
-      return false;
-    }
-  }
 }
 
 /**
