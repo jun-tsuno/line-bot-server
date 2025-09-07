@@ -15,7 +15,8 @@
 		"db:seed:dev": "node scripts/seed.js development",
 		"db:erd": "./scripts/generate-erd.sh",
 		"db:erd:svg": "npx @dbml/cli export schema.dbml -f svg -o _llm-docs/diagrams/er-diagram.svg",
-		"db:erd:png": "npx @dbml/cli export schema.dbml -f png -o _llm-docs/diagrams/er-diagram.png"
+		"db:erd:png": "npx @dbml/cli export schema.dbml -f png -o _llm-docs/diagrams/er-diagram.png",
+		"batch:test": "curl -X POST http://localhost:8787/dev/run-batch -H 'Content-Type: application/json'"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.8.19",

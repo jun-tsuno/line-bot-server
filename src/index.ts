@@ -52,6 +52,30 @@ app.onError((error, c) => {
 app.get('/', healthHandler);
 app.post('/webhook', webhookHandler);
 
+// バッチ処理テスト用ルート（開発環境）
+app.post('/dev/run-batch', async (c) => {
+  try {
+    // scheduledハンドラーをモックイベントで呼び出し
+    const mockEvent = {
+      scheduledTime: Date.now(),
+      cron: '0 2 * * *',
+    } as ScheduledEvent;
+    
+    const result = await scheduledHandler(c, mockEvent);
+    return result;
+  } catch (error) {
+    console.error('バッチ処理テスト実行エラー:', error);
+    return c.json(
+      {
+        success: false,
+        error: 'バッチ処理の実行中にエラーが発生しました',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      500
+    );
+  }
+});
+
 
 // Cloudflare Workers エクスポート
 export default {
